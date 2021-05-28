@@ -5,6 +5,7 @@ import '../models/transaction.dart';
 class TransactionList extends StatelessWidget {
   final List<Transaction> transactions;
   final Function removeTransaction;
+  
 
   TransactionList(this.transactions, this.removeTransaction);
 
@@ -13,7 +14,6 @@ class TransactionList extends StatelessWidget {
     return Container(
       child: transactions.isEmpty
           ? LayoutBuilder(builder: (context, constraints) {
-          
               return Column(
                 children: [
                   SizedBox(
@@ -27,7 +27,7 @@ class TransactionList extends StatelessWidget {
                     height: 18,
                   ),
                   Container(
-                      height: constraints.maxHeight *0.6,
+                      height: constraints.maxHeight * 0.6,
                       child: Image.asset(
                         'assets/images/waiting.png',
                         fit: BoxFit.cover,
@@ -57,13 +57,27 @@ class TransactionList extends StatelessWidget {
                   subtitle: Text(
                     DateFormat.yMMMd().format(transactions[index].date),
                   ),
-                  trailing: IconButton(
-                    icon: Icon(Icons.cancel_rounded),
-                    color: Theme.of(context).errorColor,
-                    onPressed: () {
-                      removeTransaction(transactions[index].id);
-                    },
-                  ),
+                  trailing: MediaQuery.of(context).size.width < 420
+                      ? IconButton(
+                          icon: Icon(Icons.cancel_rounded),
+                          color: Theme.of(context).errorColor,
+                          onPressed: () {
+                            removeTransaction(transactions[index].id);
+                          },
+                        )
+                      : TextButton.icon(
+                          onPressed: () {
+                            removeTransaction(transactions[index].id);
+                          },
+                          icon: Icon(Icons.cancel_rounded),
+                          
+                          label: Text('Delete'),
+                          style: TextButton.styleFrom(
+
+                            textStyle: TextStyle(color:Theme.of(context).errorColor),
+                            primary: Theme.of(context).errorColor,
+                          ),
+                        ),
                 )
 
                     // Row(

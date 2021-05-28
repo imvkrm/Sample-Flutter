@@ -1,7 +1,11 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
 import './widgets/chart.dart';
 //import 'package:flutter/services.dart';
 import '../models/transaction.dart';
-import 'package:flutter/material.dart';
 import './widgets/new_transaction.dart';
 import './widgets/transaction_list.dart';
 
@@ -121,76 +125,106 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+    final mediaQuery = MediaQuery.of(context);
 
-    var appBar = AppBar(
+    final isLandscape = mediaQuery.orientation == Orientation.landscape;
+    final appBarIOS = CupertinoNavigationBar(
+      middle: Text('Expense Planner'),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: () => _showBottomSheetaddNewTx(context),
+            child: Icon(CupertinoIcons.add),
+          ),
+        ],
+      ),
+    );
+
+    final appBarAndroid = AppBar(
       title: Text('Expense Planner'),
       actions: [
         IconButton(
-            onPressed: () => _showBottomSheetaddNewTx(context),
-            icon: Icon(Icons.add))
+          onPressed: () => _showBottomSheetaddNewTx(context),
+          icon: Icon(Icons.add),
+        ),
       ],
     );
 
+    final appBarSize =
+        Platform.isIOS ? appBarIOS.preferredSize : appBarAndroid.preferredSize;
+
     var txList = Container(
-      height: (MediaQuery.of(context).size.height -
-              appBar.preferredSize.height -
-              MediaQuery.of(context).padding.top) *
+      height: (mediaQuery.size.height -
+              appBarSize.height -
+              mediaQuery.padding.top) *
           0.70,
       child: TransactionList(_transactions, _deleteTransaction),
     );
 
-    return Scaffold(
-        appBar: appBar,
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton: FloatingActionButton(
-            child: Icon(Icons.add),
-            onPressed: () => _showBottomSheetaddNewTx(context)),
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              if (isLandscape)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Show Chart'),
-                    Switch(
-                      value: _showChart,
-                      onChanged: (val) {
-                        setState(() {
-                          _showChart = val;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              if (!isLandscape)
-                Container(
-                  width: double.infinity,
-                  child: Container(
-                      height: (MediaQuery.of(context).size.height -
-                              appBar.preferredSize.height -
-                              MediaQuery.of(context).padding.top) *
-                          0.30,
-                      child: Chart(_recentTransactions)),
-                ),
-              if (!isLandscape) txList,
-              if (isLandscape)
-                _showChart
-                    ? Container(
-                        width: double.infinity,
-                        child: Container(
-                            height: (MediaQuery.of(context).size.height -
-                                    appBar.preferredSize.height -
-                                    MediaQuery.of(context).padding.top) *
-                                0.70,
-                            child: Chart(_recentTransactions)),
-                      )
-                    : txList
-            ],
-          ),
-        ));
+    var pageBody = SafeArea(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            if (isLandscape)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Show Chart',
+                  style: Theme.of(context).textTheme.headline6,),
+                  Switch.adaptive(
+                    activeColor: Theme.of(context).accentColor,
+                    value: _showChart,
+                    onChanged: (val) {
+                      setState(() {
+                        _showChart = val;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            if (!isLandscape)
+              Container(
+                width: double.infinity,
+                child: Container(
+                    height: (mediaQuery.size.height -
+                            appBarSize.height -
+                            mediaQuery.padding.top) *
+                        0.30,
+                    child: Chart(_recentTransactions)),
+              ),
+            if (!isLandscape) txList,
+            if (isLandscape)
+              _showChart
+                  ? Container(
+                      width: double.infinity,
+                      child: Container(
+                          height: (mediaQuery.size.height -
+                                  appBarSize.height -
+                                  mediaQuery.padding.top) *
+                              0.70,
+                          child: Chart(_recentTransactions)),
+                    )
+                  : txList
+          ],
+        ),
+      ),
+    );
+    return Platform.isIOS
+        ? CupertinoPageScaffold(
+            child: pageBody,
+            navigationBar: appBarIOS,
+          )
+        : Scaffold(
+            appBar: appBarAndroid,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
+            floatingActionButton: Platform.isIOS
+                ? Container()
+                : FloatingActionButton(
+                    child: Icon(Icons.add),
+                    onPressed: () => _showBottomSheetaddNewTx(context)),
+            body: pageBody);
   }
 }
