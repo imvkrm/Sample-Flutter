@@ -52,7 +52,7 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   final List<Transaction> _transactions = [
     Transaction(
         id: 't1',
@@ -123,6 +123,75 @@ class _MyHomePageState extends State<MyHomePage> {
         .toList();
   }
 
+  List<Widget> _buildPotraitContent(
+      Size appBarSize, MediaQueryData mediaQuery, Container txList) {
+    return [
+      Container(
+        width: double.infinity,
+        child: Container(
+            height: (mediaQuery.size.height -
+                    appBarSize.height -
+                    mediaQuery.padding.top) *
+                0.30,
+            child: Chart(_recentTransactions)),
+      ),
+      txList
+    ];
+  }
+
+  List<Widget> _buildLandscapeContent(
+      Size appBarSize, MediaQueryData mediaQuery, Container txList) {
+    return [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Show Chart',
+            style: Theme.of(context).textTheme.headline6,
+          ),
+          Switch.adaptive(
+            activeColor: Theme.of(context).accentColor,
+            value: _showChart,
+            onChanged: (val) {
+              setState(() {
+                _showChart = val;
+              });
+            },
+          ),
+        ],
+      ),
+      _showChart
+          ? Container(
+              width: double.infinity,
+              child: Container(
+                  height: (mediaQuery.size.height -
+                          appBarSize.height -
+                          mediaQuery.padding.top) *
+                      0.70,
+                  child: Chart(_recentTransactions)),
+            )
+          : txList
+    ];
+  }
+
+  @override
+  void initState() {
+    WidgetsBinding.instance?.addObserver(this);
+    super.initState();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    print(state);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance?.removeObserver(this);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -168,45 +237,9 @@ class _MyHomePageState extends State<MyHomePage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             if (isLandscape)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Show Chart',
-                  style: Theme.of(context).textTheme.headline6,),
-                  Switch.adaptive(
-                    activeColor: Theme.of(context).accentColor,
-                    value: _showChart,
-                    onChanged: (val) {
-                      setState(() {
-                        _showChart = val;
-                      });
-                    },
-                  ),
-                ],
-              ),
+              ..._buildLandscapeContent(appBarSize, mediaQuery, txList),
             if (!isLandscape)
-              Container(
-                width: double.infinity,
-                child: Container(
-                    height: (mediaQuery.size.height -
-                            appBarSize.height -
-                            mediaQuery.padding.top) *
-                        0.30,
-                    child: Chart(_recentTransactions)),
-              ),
-            if (!isLandscape) txList,
-            if (isLandscape)
-              _showChart
-                  ? Container(
-                      width: double.infinity,
-                      child: Container(
-                          height: (mediaQuery.size.height -
-                                  appBarSize.height -
-                                  mediaQuery.padding.top) *
-                              0.70,
-                          child: Chart(_recentTransactions)),
-                    )
-                  : txList
+              ..._buildPotraitContent(appBarSize, mediaQuery, txList),
           ],
         ),
       ),

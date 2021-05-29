@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+
+import './transaction_item.dart';
 import '../models/transaction.dart';
 
 class TransactionList extends StatelessWidget {
@@ -38,89 +39,10 @@ class TransactionList extends StatelessWidget {
           : ListView.builder(
               itemCount: transactions.length,
               itemBuilder: (BuildContext context, int index) {
-                return Card(
-                    child: ListTile(
-                  leading: CircleAvatar(
-                    radius: 32,
-                    child: Padding(
-                      padding: EdgeInsets.all(4),
-                      child: FittedBox(
-                        child: Text(
-                          '₹${transactions[index].amount.toStringAsFixed(0)}',
-                        ),
-                      ),
-                    ),
-                  ),
-                  title: Text(
-                    transactions[index].title,
-                  ),
-                  subtitle: Text(
-                    DateFormat.yMMMd().format(transactions[index].date),
-                  ),
-                  trailing: MediaQuery.of(context).size.width < 420
-                      ? IconButton(
-                          icon: Icon(Icons.cancel_rounded),
-                          color: Theme.of(context).errorColor,
-                          onPressed: () {
-                            removeTransaction(transactions[index].id);
-                          },
-                        )
-                      : TextButton.icon(
-                          onPressed: () {
-                            removeTransaction(transactions[index].id);
-                          },
-                          icon: Icon(Icons.cancel_rounded),
-                          
-                          label: Text('Delete'),
-                          style: TextButton.styleFrom(
-
-                            textStyle: TextStyle(color:Theme.of(context).errorColor),
-                            primary: Theme.of(context).errorColor,
-                          ),
-                        ),
-                )
-
-                    // Row(
-                    //   children: [
-                    //     Container(
-                    //       margin: EdgeInsets.all(10),
-                    //       padding: EdgeInsets.all(8),
-                    //       decoration: BoxDecoration(
-                    //         border: Border.all(
-                    //           color: Theme.of(context).primaryColorLight,
-                    //           width: 1,
-                    //         ),
-                    //       ),
-                    //       child: Text(
-                    //         '₹${transactions[index].amount.toStringAsFixed(2)}',
-                    //         style: AppBarTheme.of(context).textTheme?.headline6,
-                    //         // style: TextStyle(
-                    //         //     fontWeight: FontWeight.bold,
-                    //         //     fontSize: 16,
-                    //         //     color: Theme.of(context).primaryColor),
-                    //       ),
-                    //     ),
-                    //     Column(
-                    //       crossAxisAlignment: CrossAxisAlignment.start,
-                    //       children: [
-                    //         Text(
-                    //           transactions[index].title,
-                    //           style: TextStyle(
-                    //             fontWeight: FontWeight.bold,
-                    //             fontSize: 14,
-                    //           ),
-                    //         ),
-                    //         Text(
-                    //           DateFormat.yMMMd().format(transactions[index].date),
-                    //           style: TextStyle(fontSize: 12, color: Colors.grey),
-                    //         )
-                    //       ],
-                    //     )
-                    //   ],
-                    // ),
-                    );
+                return TransactionItem(transaction: transactions[index], removeTransaction: removeTransaction,key: ValueKey(transactions[index].id),);
               },
             ),
     );
   }
 }
+

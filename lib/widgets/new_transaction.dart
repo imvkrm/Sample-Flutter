@@ -78,7 +78,7 @@ class _NewTransactionState extends State<NewTransaction> {
                 onSubmitted: (_) => _submitNewTxt(),
               ),
               Padding(
-                padding: EdgeInsets.all(8),
+                padding: const EdgeInsets.all(8),
                 child: Row(
                   children: [
                     Expanded(
